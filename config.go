@@ -8,9 +8,9 @@ import (
 )
 
 type config struct {
-	APIToken  string `yaml:"api_token"`
-	ZoneID    string `yaml:"zone_id"`
-	DNSRecord string `yaml:"dns_record"`
+	APIToken   string   `yaml:"api_token"`
+	ZoneID     string   `yaml:"zone_id"`
+	DNSRecords []string `yaml:"dns_records"`
 }
 
 func loadConfig(filename string) (*config, error) {
@@ -31,8 +31,8 @@ func loadConfig(filename string) (*config, error) {
 	if c.ZoneID == "" {
 		return nil, errors.New("must provide a Zone ID")
 	}
-	if c.APIToken == "" {
-		return nil, errors.New("must provide a DNS Record")
+	if len(c.DNSRecords) == 0 {
+		return nil, errors.New("must provide at least one DNS Record")
 	}
 	return c, err
 }

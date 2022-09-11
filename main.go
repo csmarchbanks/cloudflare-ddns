@@ -33,40 +33,42 @@ func main() {
 		os.Exit(1)
 	}
 
-	records, err := api.DNSRecords(cfg.ZoneID, cloudflare.DNSRecord{
-		Name: cfg.DNSRecord,
-	})
-	if err != nil {
-		fmt.Printf("Error listing DNS records: %+v\n", err)
-		os.Exit(1)
-	}
-
-	if len(records) > 1 {
-		fmt.Printf("More than one DNS record found, cannot proceed")
-		os.Exit(1)
-	}
-
-	dnsRecord := cloudflare.DNSRecord{
-		Type:    "A",
-		Name:    cfg.DNSRecord,
-		Content: ip.String(),
-		TTL:     120,
-	}
-
-	if len(records) > 0 {
-		err := api.UpdateDNSRecord(cfg.ZoneID, records[0].ID, dnsRecord)
+	for _, record := range cfg.DNSRecords {
+		records, err := api.DNSRecords(cfg.ZoneID, cloudflare.DNSRecord{
+			Name: record,
+		})
 		if err != nil {
-			fmt.Printf("Error updating record: %v\n", err)
+			fmt.Printf("Error listing DNS records: %+v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("DNS Record successfully updated")
-	} else {
-		_, err := api.CreateDNSRecord(cfg.ZoneID, dnsRecord)
-		if err != nil {
-			fmt.Printf("Error creating record: %v\n", err)
+
+		if len(records) > 1 {
+			fmt.Printf("More than one DNS record found, cannot proceed")
 			os.Exit(1)
 		}
-		fmt.Println("DNS Record successfully created")
+
+		dnsRecord := cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    record,
+			Content: ip.String(),
+			TTL:     120,
+		}
+
+		if len(records) > 0 {
+			err := api.UpdateDNSRecord(cfg.ZoneID, records[0].ID, dnsRecord)
+			if err != nil {
+				fmt.Printf("Error updating record: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("DNS Record successfully updated")
+		} else {
+			_, err := api.CreateDNSRecord(cfg.ZoneID, dnsRecord)
+			if err != nil {
+				fmt.Printf("Error creating record: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("DNS Record successfully created")
+		}
 	}
 }
 
